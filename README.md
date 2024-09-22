@@ -1,5 +1,7 @@
 # netio
 
+![net io logo](assets/netio.jpg)
+
 `netio` is a high-level Golang API that allows developers to send and receive raw packets over network interfaces.   
 
 This module provides an easy-to-use interface for network programming, making it suitable for applications involving raw packet crafting, sniffing, and analysis.
