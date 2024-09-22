@@ -6,6 +6,7 @@ This module provides an easy-to-use interface for network programming, making it
 
 Important: This module requires administrative privileges to send and receive raw packets. Please ensure you run your application with the necessary permissions to avoid any permission-related issues  
 
+Note: CGO must be enabled to use this module. Make sure to set the CGO_ENABLED environment variable to 1 before building/running your application to ensure proper functionality.
 ## Features
 
 - **Send and Receive Raw Packets**: Effortlessly send and receive raw Ethernet frames.
