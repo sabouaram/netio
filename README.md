@@ -121,7 +121,8 @@ func main() {
 
 ```
 ## Coming Soon
-- CI to test and for CVE detection. 
+- CI to test. 
+- CVE detection. 
 - PR template and contributions guidelines.
 - If you have an idea about a feature or an enhancement contact salimbouaram12@gmail.com. 
 
