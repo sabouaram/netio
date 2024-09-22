@@ -41,7 +41,7 @@ import (
 )
 
 func main() {
-	// this will try to let the user choose the interface he wants to use 
+	// this will try to list and to let the user choose the interface he wants to use 
 	// otherwise if you would specify the interface by default you should do => netio.NewIoInterface(false, "ensp03")
 	ioInterface, err := netio.NewIoInterface(true, "")
 	if err != nil {
