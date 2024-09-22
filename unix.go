@@ -43,7 +43,7 @@ func (u *UnixLikeIO) SendFrame(frame []byte) (int, error) {
 	copy(hardwareAddr[0:7], device.HardwareAddr[0:7])
 
 	addr := syscall.SockaddrLinklayer{
-		Protocol: 0x0300, // Change this if sending a specific protocol
+		Protocol: 0x0300, 
 		Ifindex:  device.Index,
 		Halen:    uint8(len(device.HardwareAddr)),
 		Addr:     hardwareAddr,
