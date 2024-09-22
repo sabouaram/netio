@@ -1,8 +1,10 @@
 package netio
 
 import (
+	"errors"
 	"fmt"
-	"log"
+	"github.com/fatih/color"
+	"github.com/sabouaram/cobra_ui"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -55,7 +57,11 @@ func isUnixLike() bool {
 // listAndChooseInterface lists the available network interfaces on the system and prompts the user to select one.
 // It supports both Windows and Unix-like systems.
 func listAndChooseInterface() (string, error) {
-	var choice int
+	var (
+		interfaces []string
+		choice     string
+		cmd        *exec.Cmd
+	)
 
 	if isWindows() {
 		// List network interfaces on Windows.
@@ -65,31 +71,21 @@ func listAndChooseInterface() (string, error) {
 			return "", err
 		}
 
-		log.Println("Available network interfaces:")
-
-		for i, dev := range devices {
-			log.Printf("%d: %s %s \n", i+1, dev.Name, dev.Description)
+		for _, dev := range devices {
+			interfaces = append(interfaces, fmt.Sprintf("%s (%s)", dev.Name, dev.Description))
 		}
-
-		// Ask the user to choose an interface.
-		fmt.Print("Enter the number of the interface you want to use: ")
-
-		_, err = fmt.Scanf("%d", &choice)
-		if err != nil {
-			return "", err
-		}
-
-		if choice < 1 || choice > len(devices) {
-			return "", fmt.Errorf("invalid choice")
-		}
-
-		return devices[choice-1].Name, nil
 
 	} else if isUnixLike() {
-		// List network interfaces on Unix-like systems.
-		var interfaces []string
 
-		cmd := exec.Command("ip", "-br", "link")
+		if runtime.GOOS == "linux" {
+			cmd = exec.Command("ip", "-br", "link")
+		} else if runtime.GOOS == "darwin" {
+			cmd = exec.Command("ifconfig")
+		}
+
+		if cmd == nil {
+			return "", errors.New("unsupported OS")
+		}
 
 		output, err := cmd.Output()
 
@@ -98,41 +94,39 @@ func listAndChooseInterface() (string, error) {
 		}
 
 		lines := strings.Split(string(output), "\n")
-
 		for _, line := range lines {
-
 			if len(line) > 0 {
 				parts := strings.Fields(line)
-
 				if len(parts) > 0 {
 					interfaces = append(interfaces, parts[0])
 				}
 			}
 		}
-
-		log.Println("Available network interfaces:")
-
-		for i, device := range interfaces {
-			fmt.Printf("%d: %s\n", i+1, device)
-		}
-
-		// Ask the user to choose an interface.
-		fmt.Print("Enter the number of the interface you want to use: ")
-
-		_, err = fmt.Scanf("%d", &choice)
-
-		if err != nil {
-			return "", err
-		}
-
-		if choice < 1 || choice > len(interfaces) {
-			return "", fmt.Errorf("invalid choice")
-		}
-
-		return interfaces[choice-1], nil
 	}
 
-	return "", fmt.Errorf("unsupported operating system")
+	if len(interfaces) == 0 {
+		return "", fmt.Errorf("no network interfaces found")
+	}
+
+	// Use cobra_ui for the interactive interface selection.
+
+	ui := cobra_ui.New()
+	ui.SetQuestions([]cobra_ui.Question{
+		{
+			CursorStr: "==>",
+			Color:     color.FgCyan,
+			Text:      "Choose a network interface:",
+			Options:   interfaces,
+			Handler: func(input string) error {
+				choice = input
+				return nil
+			},
+		},
+	})
+
+	ui.RunInteractiveUI()
+
+	return strings.Split(choice, " ")[0], nil
 }
 
 // WindowsIO represents network I/O for Windows systems.
